@@ -37,7 +37,7 @@ clear; clc; close all;
     grid on
 
     opts = optimoptions(@fsolve,'Algorithm', 'levenberg-marquardt');
-    xx = oncurve(xp,yp,xp(1),yp(1))
+    xx = oncurve(xp,yp,xp(1),yp(1));
     % Intersection points
     xi = [];
     yi = [];
@@ -50,20 +50,20 @@ clear; clc; close all;
                 if solid(i+1,j)
                     % Calculate the intersection point
                     p = polyfit([x(i,j),x(i+1,j)],[y(i,j),y(i,j)],1);
-                    %[xi, yi] = calculate_intersection_point(p,y(i,j),xi,yi,radius,cx,cy);
+                    [xi, yi] = calculate_intersection_point(p,10,xi,yi,radius,cx,cy);
                     xqq = linspace(x(i,j),x(i+1,j),10);
                     plot(xqq,polyval(p,xqq),'-')
-                    %plot(xi,yi,'kx')
-                    
-                    f = @(x) oncurve(xp,yp,x(1),x(2));
+                    plot(xi,yi,'kx')
+                   
+%                     return
 
-                    xii = fsolve(f,[x(i+1,j),y(i,j)],opts);
-                     plot(xii(1),xii(2),'kx')
-                    return
-
-%                 elseif solid(i-1,j)
-%                     p = polyfit([x(i,j),x(i-1,j)],[y(i,j),y(i,j)],1);
-%                     [xi, yi] = calculate_intersection_point(p,x(i,j),xi,yi);
+                elseif solid(i-1,j)
+                    p = polyfit([x(i,j),x(i-1,j)],[y(i,j),y(i,j)],1);
+                    [xi, yi] = calculate_intersection_point(p,x(i,j),xi,yi);
+                    [xi, yi] = calculate_intersection_point(p,10,xi,yi,radius,cx,cy);
+                    xqq = linspace(x(i,j),x(i+1,j),10);
+                    plot(xqq,polyval(p,xqq),'-')
+                    plot(xi,yi,'kx')
 % 
 %                 elseif solid(i,j+1)
 %                      p = polyfit([x(i,j),x(i,j)],[y(i,j),y(i,j+1)],1);
@@ -80,8 +80,8 @@ clear; clc; close all;
 % end
 function [xi, yi] = calculate_intersection_point(p,xo,xi,yi,r,cx,cy)
     t = fzero(@(x) r*sin(x) + cy - p(1) * (r*cos(x) + cx) - p(2),xo);
-                    xi = [xi, cos(t)];
-                    yi = [yi, sin(t)];
+                    xi = [xi, r*cos(t)+cx];
+                    yi = [yi, r*sin(t)+cy];
 end
 
 function xx = oncurve(xp,yp,x,y)
