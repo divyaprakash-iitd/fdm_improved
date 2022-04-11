@@ -15,7 +15,7 @@ function T = solve_poisson(A,B,T)
     Nx = size(A,1);
     Ny = size(A,2);
     
-    figure(1)
+    figure()
     h1 = gca;
     hold on
     xlabel('Iterations')
@@ -58,12 +58,12 @@ function T = solve_poisson(A,B,T)
         ERR = norm(RR(:));
         semilogy(iIter,ERR,'r.')
     end
-    figure(2)
+    figure()
     TA = T(1:Nx,1:Ny);
     contourf(TA',30,'edgecolor','none')
     colormap(jet)
     colorbar
     
-    figure(1)
+    figure()
     set(h1,'yscale','log')
 end
