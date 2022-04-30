@@ -13,7 +13,7 @@ Y = linspace(0,ymax,ny);
 [x,y] = ndgrid(X,Y);
 
 % Generate a parametric closed curve
-np = 60;
+np = 6;
 t = linspace(0,2*pi,np);
 cx = xmax/2; cy = ymax/2;
 radius = 0.2;
@@ -22,8 +22,7 @@ a = 0.25;
 b = 0.25;
 xp = a* cos(t) + cx;
 yp = b*sin(t) + cy;
-
-% Tells us the index of x and y which are inside or on the closed curve.so                          
+                 
 [in, on] = inpolygon(x,y,xp,yp);
 
 % Define flags
