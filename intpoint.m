@@ -10,7 +10,7 @@ xmax = 10;
 ymax = 10;
 ar = xmax/ymax;
 
-nx = 100;
+nx = 200;
 ny = nx/ar;
 
 % Create grid points
@@ -18,10 +18,12 @@ X = linspace(0,xmax,nx);
 Y = linspace(0,ymax,ny);
 [x,y] = ndgrid(X,Y);
 
-np = 50;
+np = 60;
 cx = xmax/2; cy = ymax/2;
+[xp,yp] = closed_curve('cardoid',np,2,[cx,cy]);
 % [xp,yp] = closed_curve('hypocycloid',np,3,[cx,cy]);
-[xp,yp] = closed_curve('ellipse',np,3,[cx,cy]);
+% [xp,yp] = closed_curve('tear',np,3,[cx,cy]);
+% [xp,yp] = closed_curve('ellipse',np,3,[cx,cy]);
 [xip,yip,xg,yg,beta] = calculate_coefficients(xp,yp,x,y);
 
 [solid,liquid,boundary,inner] = generate_flags(xp,yp,x,y);  
@@ -30,9 +32,9 @@ T = zeros(size(x));
 
 % Generate boundary conditions value
 
-Tb = abs(500*sin(x(solid)));
 T(boundary) = 200;
 
+Tb = abs(500*sin(x(solid)));
 T(solid) = Tb;
 
 for iter = 1:1000
@@ -58,8 +60,13 @@ axis equal
 colorbar
 hold on
 plot(xp,yp,'LineWidth',2)
-% plot(xip,yip,'ko','MarkerSize',6)
-% mesh(x,y,ones(size(x)),'facealpha',0,'edgealpha',0.2)
+plot(xip,yip,'ko','MarkerSize',6)
+mesh(x,y,ones(size(x)),'facealpha',0,'edgealpha',0.2)
+
+% figure()
+% scatter(xg(:),yg(:),T(:),T(:),'.','LineWidth',4)
+
+% plot(x    g,yg,'w+')
 % hold on
 % plot(x(liquid),y(liquid),'rx')
 % plot(x(solid),y(solid),'bx')
