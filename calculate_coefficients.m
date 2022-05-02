@@ -1,27 +1,5 @@
-clear; clc; close all;
+function [xip,yip,xg,yg,beta] = calculate_coefficients(xp,yp,x,y)   
 
-xmax = 1;
-ymax = 1;
-ar = xmax/ymax;
-
-nx = 20;
-ny = nx/ar;
-
-% Create grid points
-X = linspace(0,xmax,nx);
-Y = linspace(0,ymax,ny);
-[x,y] = ndgrid(X,Y);
-
-% Generate a parametric closed curve
-np = 6;
-t = linspace(0,2*pi,np);
-cx = xmax/2; cy = ymax/2;
-radius = 0.2;
-
-a = 0.25;
-b = 0.25;
-xp = a* cos(t) + cx;
-yp = b*sin(t) + cy;
                  
 [in, on] = inpolygon(x,y,xp,yp);
 
@@ -29,52 +7,96 @@ yp = b*sin(t) + cy;
 solid = logical(in + on);
 liquid = ~solid;
 
-hold on
-plot(x(liquid),y(liquid),'rx')
-plot(x(solid),y(solid),'bx')
-plot(xp,yp,'k-.')
-axis equal
-grid on
+% hold on
+% plot(x(liquid),y(liquid),'rx')
+% plot(x(solid),y(solid),'bx')
+% plot(xp,yp,'k-.')
+% axis equal
+% grid on
+
+xip = [];
+yip = [];
+
+nx = size(x,1);
+ny = size(x,2);
+
+xg = x; yg = y;
+xing(solid) = nan;
+yg(solid) = nan;
+
+% Coefficient matrix
+% Constants
+LEFT        = 1;
+RIGHT       = 2;
+TOP         = 3;
+BOTTOM      = 4;
+
+beta = ones(nx,ny,4);
 
 % Loop over non-boundary nodes
 for i = 2:nx-1
     for j = 2:ny-1
         % Loop over only liquid nodes
         if liquid(i,j)
-%             plot(x(i,j),y(i,j),'ro')
-            % Check for all the four neighbouring nodes
             if solid(i+1,j)
-%                 plot(x(i+1,j),y(i+1,j),'ro')
-                % Calculate the intersection point
                 px = [x(i,j),x(i+1,j)];
                 py = [y(i,j),y(i+1,j)];
                 [xi, yi] = polyxpoly(xp,yp,px,py);     
-                plot(xi,yi,'mo')
+%                 plot(xi,yi,'mo')
+                xip = [xip, xi];
+                yip = [yip, yi];
+
+                xg(i+1,j) = xi;
+                yg(i+1,j) = yi;
+
+                % Right
+                % Distance between intersection point and the grid point
+                beta(i,j,RIGHT) = norm([xi-x(i+1,j),yi-y(i+1,j)]);
+
             end
                 
             if solid(i-1,j)
-%                 plot(x(i-1,j),y(i-1,j),'ro')
                 px = [x(i-1,j),x(i,j)];
                 py = [y(i-1,j),y(i,j)];
                 [xi, yi] = polyxpoly(xp,yp,px,py);
-                plot(xi,yi,'mo')
+%                 plot(xi,yi,'mo')
+                xip = [xip, xi];
+                yip = [yip, yi];
+
+                xg(i-1,j) = xi;
+                yg(i-1,j) = yi;
+
+                beta(i,j,LEFT) = norm([xi-x(i-1,j),yi-y(i-1,j)]);
             end
                 
             if solid(i,j+1)
-%                 plot(x(i,j+1),y(i,j+1),'ro')
                 px = [x(i,j),x(i,j+1)];
                 py = [y(i,j),y(i,j+1)];
                 [xi, yi] = polyxpoly(xp,yp,px,py);
-                plot(xi,yi,'mo')
+%                 plot(xi,yi,'mo')
+                xip = [xip, xi];
+                yip = [yip, yi];
+
+                xg(i,j+1) = xi;
+                yg(i,j+1) = yi;
+
+                beta(i,j,TOP) = norm([xi-x(i,j+1),yi-y(i,j+1)]);
             end
                            
             if solid(i,j-1)
-%                 plot(x(i,j-1),y(i,j-1),'ro')
                 px = [x(i,j-1),x(i,j)];
                 py = [y(i,j-1),y(i,j)];
                 [xi, yi] = polyxpoly(xp,yp,px,py);
-                plot(xi,yi,'mo')             
+                xip = [xip, xi];
+                yip = [yip, yi];
+%                 plot(xi,yi,'mo') 
+                
+                xg(i,j-1) = xi;
+                yg(i,j-1) = yi;
+
+                beta(i,j,BOTTOM) = norm([xi-x(i,j-1),yi-y(i,j-1)]);
             end
         end
     end
+end
 end
