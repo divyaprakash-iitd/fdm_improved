@@ -21,7 +21,7 @@ nx = size(x,1);
 ny = size(x,2);
 
 xg = x; yg = y;
-xing(solid) = nan;
+xg(solid) = nan;
 yg(solid) = nan;
 
 % Coefficient matrix
