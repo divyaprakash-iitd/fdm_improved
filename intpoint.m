@@ -20,7 +20,8 @@ Y = linspace(0,ymax,ny);
 
 np = 50;
 cx = xmax/2; cy = ymax/2;
-[xp,yp] = closed_curve('hypocycloid',np,3,[cx,cy]);
+% [xp,yp] = closed_curve('hypocycloid',np,3,[cx,cy]);
+[xp,yp] = closed_curve('ellipse',np,3,[cx,cy]);
 [xip,yip,xg,yg,beta] = calculate_coefficients(xp,yp,x,y);
 
 [solid,liquid,boundary,inner] = generate_flags(xp,yp,x,y);  
@@ -29,7 +30,7 @@ T = zeros(size(x));
 
 % Generate boundary conditions value
 
-Tb = 500*sin(x(solid));
+Tb = abs(500*sin(x(solid)));
 T(boundary) = 200;
 
 T(solid) = Tb;
