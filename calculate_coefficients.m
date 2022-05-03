@@ -31,7 +31,7 @@ RIGHT       = 2;
 TOP         = 3;
 BOTTOM      = 4;
 
-beta = ones(nx,ny,4);
+beta = zeros(nx,ny,4);
 
 % Loop over non-boundary nodes
 for i = 2:nx-1

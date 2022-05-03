@@ -19,7 +19,7 @@ Y       = linspace(0,ymax,ny);
 [x,y]   = ndgrid(X,Y);
 
 % Define solid(s) [Make sure that the solids do not overlap]
-nsolid  = 3;
+nsolid  = 1;
 sloc    = nsolid+1;
 dx      = xmax/sloc;
 xp      = [];
@@ -35,7 +35,7 @@ for isolid = 1:nsolid
     cx = dx*(isolid);
     cy = ymax/2;
 
-    [ixp,iyp]               = closed_curve('ellipse',np,1.5,[cx,cy]);
+    [ixp,iyp]               = closed_curve('ellipse',np,2,[cx,cy]);
     [ixip,iyip,xg(:,:,isolid),yg(:,:,isolid),...
         beta(:,:,:,isolid)] = calculate_coefficients(ixp,iyp,x,y);
     
@@ -47,6 +47,7 @@ for isolid = 1:nsolid
 end
 
 beta = sum(beta,4);
+beta(beta<=1e-14) = 1;
 
 [solid,liquid,boundary,inner] = generate_flags(xp,yp,x,y);  
 
@@ -54,7 +55,7 @@ beta = sum(beta,4);
 T           = zeros(size(x));
 T(boundary) = 0;
 
-Tb = [200,600,300];
+Tb = [600,600,300];
 for isolid = 1:size(solid,3)
 %     Tb = 500;%*isolid;%abs(500*sin(2*x(solid(:,:,isolid))));
     T(solid(:,:,isolid)) = Tb(isolid);
@@ -85,7 +86,7 @@ end
 hold on
 for isolid = 1:nsolid
     contourf(xg(:,:,isolid),yg(:,:,isolid),T,50,'edgecolor','none')
-    plot(xp(isolid,:),yp(isolid,:),'-','LineWidth',2)
+    plot(xp(isolid,:),yp(isolid,:),'k-','LineWidth',2)
     plot(xip{isolid},yip{isolid},'ko','MarkerSize',6)
 end
 colormap("jet")
