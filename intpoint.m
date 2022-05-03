@@ -6,11 +6,11 @@ RIGHT       = 2;
 TOP         = 3;
 BOTTOM      = 4;
 
-xmax = 10;
-ymax = 10;
+xmax = 15;
+ymax = 15;
 ar = xmax/ymax;
 
-nx = 200;
+nx = 100;
 ny = nx/ar;
 
 % Create grid points
@@ -18,13 +18,35 @@ X = linspace(0,xmax,nx);
 Y = linspace(0,ymax,ny);
 [x,y] = ndgrid(X,Y);
 
-np = 60;
-cx = xmax/2; cy = ymax/2;
-[xp,yp] = closed_curve('cardoid',np,2,[cx,cy]);
+
+% Define number of solids
+nsolid = 2;
+dloc = nsolid+1;
+dx = xmax/dloc;
+xp = [];
+yp = [];
+xg = zeros(nx,ny,nsolid);
+yg = zeros(nx,ny,nsolid);
+beta = zeros(nx,ny,4,nsolid);
+for isolid = 1:nsolid
+    np = 60;
+    cx = dx*(isolid); cy = ymax/2;
+    [ixp,iyp] = closed_curve('ellipse',np,2,[cx,cy]);
+    [xip,yip,xg(:,:,isolid),yg(:,:,isolid),beta(:,:,:,isolid)] = calculate_coefficients(ixp,iyp,x,y);
+    xp = [xp;ixp];
+    yp = [yp;iyp];
+end
+beta = sum(beta,4);
+xg = sum(xg,3);
+yg = sum(yg,3);
+% [xp,yp] = closed_curve('cardoid',np,2,[cx,cy]);
+% [xp,yp] = closed_curve('cardoid',np,2,[cx,cy]);
 % [xp,yp] = closed_curve('hypocycloid',np,3,[cx,cy]);
 % [xp,yp] = closed_curve('tear',np,3,[cx,cy]);
 % [xp,yp] = closed_curve('ellipse',np,3,[cx,cy]);
-[xip,yip,xg,yg,beta] = calculate_coefficients(xp,yp,x,y);
+
+
+% [xip,yip,xg,yg,beta] = calculate_coefficients(xp,yp,x,y);
 
 [solid,liquid,boundary,inner] = generate_flags(xp,yp,x,y);  
 
@@ -32,10 +54,12 @@ T = zeros(size(x));
 
 % Generate boundary conditions value
 
-T(boundary) = 200;
+T(boundary) = 0;
 
-Tb = abs(500*sin(x(solid)));
-T(solid) = Tb;
+for isolid = 1:size(solid,3)
+    Tb = 500;%*isolid;%abs(500*sin(2*x(solid(:,:,isolid))));
+    T(solid(:,:,isolid)) = Tb;
+end
 
 for iter = 1:1000
     for i = 1:nx
@@ -53,20 +77,20 @@ for iter = 1:1000
         end
     end
 end
-
+    
 contourf(xg,yg,T,50,'edgecolor','none')
 colormap("jet")
 axis equal
 colorbar
 hold on
-plot(xp,yp,'LineWidth',2)
-plot(xip,yip,'ko','MarkerSize',6)
-mesh(x,y,ones(size(x)),'facealpha',0,'edgealpha',0.2)
+% plot(xp,yp,'LineWidth',2)
+% plot(xip,yip,'ko','MarkerSize',6)
+% mesh(x,y,ones(size(x)),'facealpha',0,'edgealpha',0.3)
 
 % figure()
 % scatter(xg(:),yg(:),T(:),T(:),'.','LineWidth',4)
 
-% plot(x    g,yg,'w+')
+% plot(xg,yg,'w+')
 % hold on
 % plot(x(liquid),y(liquid),'rx')
 % plot(x(solid),y(solid),'bx')
