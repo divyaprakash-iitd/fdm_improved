@@ -4,7 +4,7 @@ function [xp,yp] = closed_curve(name,np,l,center)
     cx = center(1); cy = center(2);
     if strcmp(name,'ellipse')
         a = l;
-        ar = 2;
+        ar = 1;
         b = a/ar;
         xp = a* cos(t);
         yp = b*sin(t);

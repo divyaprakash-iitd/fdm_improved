@@ -6,61 +6,62 @@ RIGHT       = 2;
 TOP         = 3;
 BOTTOM      = 4;
 
+% Domain size
 xmax = 15;
 ymax = 15;
-ar = xmax/ymax;
+ar  = xmax/ymax;
 
-nx = 100;
-ny = nx/ar;
+% Mesh
+nx      = 100;
+ny      = nx/ar;
+X       = linspace(0,xmax,nx);
+Y       = linspace(0,ymax,ny);
+[x,y]   = ndgrid(X,Y);
 
-% Create grid points
-X = linspace(0,xmax,nx);
-Y = linspace(0,ymax,ny);
-[x,y] = ndgrid(X,Y);
+% Define solid(s) [Make sure that the solids do not overlap]
+nsolid  = 3;
+sloc    = nsolid+1;
+dx      = xmax/sloc;
+xp      = [];
+yp      = [];
+xip      = {};
+yip      = {};
+xg      = zeros(nx,ny,nsolid);
+yg      = zeros(nx,ny,nsolid);
+beta    = zeros(nx,ny,4,nsolid);
 
-
-% Define number of solids
-nsolid = 2;
-dloc = nsolid+1;
-dx = xmax/dloc;
-xp = [];
-yp = [];
-xg = zeros(nx,ny,nsolid);
-yg = zeros(nx,ny,nsolid);
-beta = zeros(nx,ny,4,nsolid);
 for isolid = 1:nsolid
     np = 60;
-    cx = dx*(isolid); cy = ymax/2;
-    [ixp,iyp] = closed_curve('ellipse',np,2,[cx,cy]);
-    [xip,yip,xg(:,:,isolid),yg(:,:,isolid),beta(:,:,:,isolid)] = calculate_coefficients(ixp,iyp,x,y);
+    cx = dx*(isolid);
+    cy = ymax/2;
+
+    [ixp,iyp]               = closed_curve('ellipse',np,1.5,[cx,cy]);
+    [ixip,iyip,xg(:,:,isolid),yg(:,:,isolid),...
+        beta(:,:,:,isolid)] = calculate_coefficients(ixp,iyp,x,y);
+    
+    % Collect the points
     xp = [xp;ixp];
     yp = [yp;iyp];
+    xip = [xip;ixip];
+    yip = [yip;iyip];
 end
+
 beta = sum(beta,4);
-xg = sum(xg,3);
-yg = sum(yg,3);
-% [xp,yp] = closed_curve('cardoid',np,2,[cx,cy]);
-% [xp,yp] = closed_curve('cardoid',np,2,[cx,cy]);
-% [xp,yp] = closed_curve('hypocycloid',np,3,[cx,cy]);
-% [xp,yp] = closed_curve('tear',np,3,[cx,cy]);
-% [xp,yp] = closed_curve('ellipse',np,3,[cx,cy]);
-
-
-% [xip,yip,xg,yg,beta] = calculate_coefficients(xp,yp,x,y);
 
 [solid,liquid,boundary,inner] = generate_flags(xp,yp,x,y);  
 
-T = zeros(size(x));
-
-% Generate boundary conditions value
-
+% Initial and Boundary Conditions
+T           = zeros(size(x));
 T(boundary) = 0;
 
+Tb = [200,600,300];
 for isolid = 1:size(solid,3)
-    Tb = 500;%*isolid;%abs(500*sin(2*x(solid(:,:,isolid))));
-    T(solid(:,:,isolid)) = Tb;
+%     Tb = 500;%*isolid;%abs(500*sin(2*x(solid(:,:,isolid))));
+    T(solid(:,:,isolid)) = Tb(isolid);
 end
 
+
+% Solve using finite difference method
 for iter = 1:1000
     for i = 1:nx
         for j = 1:ny
@@ -77,24 +78,25 @@ for iter = 1:1000
         end
     end
 end
-    
-contourf(xg,yg,T,50,'edgecolor','none')
+
+% T(logical(sum(solid,3))) = nan;
+
+% Plot figures
+hold on
+for isolid = 1:nsolid
+    contourf(xg(:,:,isolid),yg(:,:,isolid),T,50,'edgecolor','none')
+    plot(xp(isolid,:),yp(isolid,:),'-','LineWidth',2)
+    plot(xip{isolid},yip{isolid},'ko','MarkerSize',6)
+end
 colormap("jet")
 axis equal
 colorbar
-hold on
-% plot(xp,yp,'LineWidth',2)
-% plot(xip,yip,'ko','MarkerSize',6)
-% mesh(x,y,ones(size(x)),'facealpha',0,'edgealpha',0.3)
+mesh(x,y,ones(size(x)),'facealpha',0,'edgealpha',0.3)
 
-% figure()
-% scatter(xg(:),yg(:),T(:),T(:),'.','LineWidth',4)
 
-% plot(xg,yg,'w+')
-% hold on
-% plot(x(liquid),y(liquid),'rx')
-% plot(x(solid),y(solid),'bx')
-% plot(xp,yp,'k-.')
-% axis equal
-% grid on
-% plot(xip,yip,'r*')
+%% Shapes examples
+% [xp,yp] = closed_curve('cardoid',np,2,[cx,cy]);
+% [xp,yp] = closed_curve('cardoid',np,2,[cx,cy]);
+% [xp,yp] = closed_curve('hypocycloid',np,3,[cx,cy]);
+% [xp,yp] = closed_curve('tear',np,3,[cx,cy]);
+% [xp,yp] = closed_curve('ellipse',np,3,[cx,cy]);
