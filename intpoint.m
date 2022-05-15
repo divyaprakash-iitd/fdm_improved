@@ -19,7 +19,7 @@ Y       = linspace(0,ymax,ny);
 [x,y]   = ndgrid(X,Y);
 
 % Define solid(s) [Make sure that the solids do not overlap]
-nsolid  = 1;
+nsolid  = 2;
 sloc    = nsolid+1;
 dx      = xmax/sloc;
 xp      = [];
@@ -35,7 +35,7 @@ for isolid = 1:nsolid
     cx = dx*(isolid);
     cy = ymax/2;
 
-    [ixp,iyp]               = closed_curve('ellipse',np,2,[cx,cy]);
+    [ixp,iyp]               = closed_curve('hypocycloid',np,2,[cx,cy]);
     [ixip,iyip,xg(:,:,isolid),yg(:,:,isolid),...
         beta(:,:,:,isolid)] = calculate_coefficients(ixp,iyp,x,y);
     
@@ -86,14 +86,17 @@ end
 hold on
 for isolid = 1:nsolid
     contourf(xg(:,:,isolid),yg(:,:,isolid),T,50,'edgecolor','none')
-    plot(xp(isolid,:),yp(isolid,:),'k-','LineWidth',2)
-    plot(xip{isolid},yip{isolid},'ko','MarkerSize',6)
+%     plot(xip{isolid},yip{isolid},'ko','MarkerSize',6)
 end
+
+plot(xp',yp','k-','LineWidth',2)
+fill(xp',yp','k')
+
 colormap("jet")
 axis equal
-colorbar
+% colorbar
 mesh(x,y,ones(size(x)),'facealpha',0,'edgealpha',0.3)
-
+axis off
 
 %% Shapes examples
 % [xp,yp] = closed_curve('cardoid',np,2,[cx,cy]);
